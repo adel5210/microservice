@@ -1,0 +1,49 @@
+server:
+  port: 8989
+spring:
+  application:
+    name: CONTENT_STREAM
+  data:
+    redis:
+      url: ${REDIS_URL}
+      password: ${REDIS_PSSWD}
+  shell:
+    interactive:
+      enabled: false
+  kafka:
+    bootstrap-servers: adjusted-piranha-11234-us1-kafka.upstash.io:9092
+    properties:
+      security.protocol: SASL_SSL
+      sasl.mechanism: SCRAM-SHA-256
+      sasl.jaas.config: org.apache.kafka.common.security.scram.ScramLoginModule required username="${kafka-uptash.user}" password="${kafka-uptash.password}";
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      transaction-id-prefix: ${kafka-uptash.topic.producer}_TID
+    consumer:
+      group-id: ${kafka-uptash.topic.consumer}_GID
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        isolation.level: read_committed
+      enable-auto-commit: false
+    streams:
+      bootstrap-servers: adjusted-piranha-11234-us1-kafka.upstash.io:9092
+      application-id: KS_CONTENT_STREAM
+      properties:
+        default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+        default.value.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+        compression.type: gzip
+
+
+logging:
+  pattern.console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){blue} %clr(---){faint} %clr([%15.15t]){yellow} %clr([%X{ram}]){green} %clr(:){red} %clr(%m){faint}%n"
+
+# Custom config
+kafka-uptash:
+  user: ${UPTASH_KAFKA_USER}
+  password: ${UPTASH_KAFKA_PSSWD}
+  topic:
+    consumer: K_CONTENT_STREAM_ENTRY
+    producer: K_CONTENT_STREAM_ENTRY
